@@ -15,15 +15,16 @@ router.get ('/', (req, res) => {
 });
 
 router.get ('/image', async function(req, res){
+  try{
   let idphoto = req.query.idcurrent;
 
-  if(!/^[a-zA-Z0-9_.]*$/.test(idphoto))
+  /*if(!/^[a-zA-Z0-9_.]*$/.test(idphoto))
   {
     const image= await database.getRandomImage();
     res.send(fs.readFileSync(image.Path));
-  }
+  }*/
   console.log((new Date()).toUTCString()+' - ' +idphoto);
-  const image= await database.getImage2(idphoto);
+  const image= await database.getImage(idphoto);
   if(image==undefined || !image)
   {
     const image= await database.getRandomImage();
@@ -43,12 +44,17 @@ router.get ('/image', async function(req, res){
     const image= await database.getRandomImage();
     res.send(fs.readFileSync(image.Path));
   }
+  }
+  catch(e){
+    res.send("Error");
+    return;
+  }
 });
 
 
 router.get ('/next', async (req, res) => {
   const image= await database.getRandomImage();
-  res.send(image.Name);
+  res.send(image.MD5);
 });
 
 
@@ -57,10 +63,51 @@ router.get ('/favicon.ico', (req, res) => {
   res.send(data);
 });
 
+
+router.get ('/ban', async function(req, res){
+  try{
+    let idphoto = req.query.idcurrent;
+    database.setNote(idphoto,0);
+    res.send("OK");
+  }
+  catch(e){
+    res.send("Error");
+    return;
+  }
+});
+
+router.get ('/like', async function(req, res){
+  try{
+    let idphoto = req.query.idcurrent;
+    database.addToNote(idphoto,1);
+    res.send("OK");
+  }
+  catch(e){
+    res.send("Error");
+    return;
+  }
+});
+
+router.get ('/dislike', async function(req, res){
+  try{
+    let idphoto = req.query.idcurrent;
+    database.addToNote(idphoto,-1);
+    res.send("OK");
+  }
+  catch(e){
+    res.send("Error");
+    return;
+  }
+});
+
+
+
 isPhoto =function (path)
 {
   return /^.*(\.jpg|\.jpeg)$/i.test(path);
 }
+
+
 
 
 module.exports = router;

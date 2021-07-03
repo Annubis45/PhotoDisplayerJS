@@ -63,7 +63,7 @@ function request(fonction, onsuccess)
 function Init(RefreshTime) {
     /*window.onload = function () { SetDim("image") };
     window.onresize = function () { SetDim("image") };*/
-    for(let i=0;i<imagesBufferPrev;i++)
+    for(var i=0;i<imagesBufferPrev;i++)
     {
         AddImageInBuffer(i);
     }
@@ -94,6 +94,7 @@ function NextImageFromBuffer()
 
 function preloadImage(url, idImage)
 {
+    console.log("Preloading : " + url);
     var img=new Image();
     img.src=url;
 }

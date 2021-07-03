@@ -43,13 +43,13 @@ module.exports = {
         return new Promise(function(resolve, reject) {
             db.serialize(() => {
                 db.each(`SELECT Name as Name,
-                            Path as Path
+                            Path as Path, MD5 as MD5
                         FROM Photos ORDER BY RANDOM()*Note limit 1`, (err, row) => {
                     if (err) {
                         console.error(err.message);
                         reject(err.message);
                     }else{
-                        console.log((new Date()).toUTCString()+' - ' +row)
+                        console.log((new Date()).toUTCString()+' - ' + JSON.stringify(row) )
                         resolve(row);
                     }
                 });
@@ -57,28 +57,10 @@ module.exports = {
         });
     },
 
-    getImage(idphoto){
-        return new Promise(function(resolve, reject) {
-            db.serialize(() => {
-                db.each(`SELECT Name as Name,
-                            Path as Path
-                        FROM Photos where Name='`+idphoto+`' limit 1`, (err, row) => {
-                if (err) {
-                    console.error(err.message);
-                    reject(err.message);
-                }else{
-                    console.log((new Date()).toUTCString()+' - ' +row)
-                    resolve(row);
-                }
-                });
-            });
-        });
-    },
-
-    getImage2(idphoto)
+    getImage(idphoto)
     {
         return new Promise(function(resolve, reject) {
-        let sql = `SELECT Name as Name, Path as Path FROM Photos where Name = ?`;
+        let sql = `SELECT Name as Name, Path as Path FROM Photos where MD5 = ?`;
 
         // first row only
         db.get(sql, [idphoto], (err, row) => {
@@ -117,6 +99,34 @@ module.exports = {
                     db.run(`DELETE FROM Photos WHERE id=`+row.Id);
                 }
             }
+            });
+        });
+    },
+
+    setNote(idPhoto,note)
+    {
+        db.serialize(() => {
+            
+            db.run(`UPDATE Photos SET Note=${note} where MD5=${idPhoto}`,function(err){
+            if (err) {
+                return console.log((new Date()).toUTCString()+' - ' +err.message + ' - Name = '+Name+ ' - Path = '+Path);
+            }
+            // get the last insert id
+            console.log((new Date()).toUTCString()+' - ' +`Note of ${idPhoto} set to  ${note}`);
+            });
+        });
+    },
+    
+    addToNote(idPhoto,num)
+    {
+        db.serialize(() => {
+            
+            db.run(`UPDATE Photos SET Note=Note+${num} where MD5=${idPhoto}`,function(err){
+            if (err) {
+                return console.log((new Date()).toUTCString()+' - ' +err.message + ' - Name = '+Name+ ' - Path = '+Path);
+            }
+            // get the last insert id
+            console.log((new Date()).toUTCString()+' - ' +`Note of ${idPhoto} incremented by  ${num}`);
             });
         });
     }
